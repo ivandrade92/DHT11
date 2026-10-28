@@ -1,15 +1,17 @@
 #include <ESP8266WiFi.h>
-#include <DHT.h>
 #include <ESP8266HTTPClient.h>
+#include <DHT.h>
 
 // ----- Configuración -----
-#define DHTPIN 5 // GPIO5 = D1 en NodeMCU
+#define DHTPIN 5          // GPIO5 = D1
 #define DHTTYPE DHT11
 #define LED_PIN LED_BUILTIN
 
-const char *ssid = "Ivan-office";
-const char *password = "Wifi2026$";
-const char *servidor = "http://192.168.1.100:5000/api/iot/sensor";
+const char* ssid = "Ivan-office";
+const char* password = "Wifi2026$";
+
+const char* servidor =
+  "http://192.168.0.168:5000/api/iot/sensor";
 
 // ----- Objetos -----
 DHT dht(DHTPIN, DHTTYPE);
@@ -37,15 +39,18 @@ void conectarWiFi()
 
 void parpadearLED()
 {
-  digitalWrite(LED_PIN, LOW); // Encender LED
+  digitalWrite(LED_PIN, LOW);
   delay(100);
-  digitalWrite(LED_PIN, HIGH); // Apagar LED
+
+  digitalWrite(LED_PIN, HIGH);
+  delay(100);
 }
+
 void enviarDatos(float temperatura, float humedad)
 {
   if (WiFi.status() != WL_CONNECTED)
   {
-    Serial.println("WiFi desconectado. No se envían datos.");
+    Serial.println("WiFi desconectado");
     return;
   }
 
@@ -53,6 +58,7 @@ void enviarDatos(float temperatura, float humedad)
   HTTPClient http;
 
   http.begin(client, servidor);
+
   http.addHeader("Content-Type", "application/json");
 
   String json = "{";
@@ -73,12 +79,18 @@ void enviarDatos(float temperatura, float humedad)
     parpadearLED();
 
     Serial.println("POST OK");
+
+    String respuesta = http.getString();
+
+    Serial.print("Respuesta: ");
+    Serial.println(respuesta);
   }
   else
   {
     Serial.print("Error HTTP: ");
     Serial.println(codigo);
   }
+
   http.end();
 }
 
@@ -92,13 +104,15 @@ void setup()
   dht.begin();
 
   WiFi.mode(WIFI_STA);
+
   conectarWiFi();
 
   Serial.println("Sistema iniciado");
 }
+
 void loop()
 {
-  // Gestión WiFi sin bloqueos
+  // Gestión WiFi
   if (WiFi.status() != WL_CONNECTED)
   {
     if (millis() - ultimoIntentoWifi >= INTERVALO_WIFI)
@@ -121,7 +135,7 @@ void loop()
     }
   }
 
-  // Lectura del sensor
+  // Lectura periódica
   if (millis() - ultimaLectura >= INTERVALO_LECTURA)
   {
     ultimaLectura = millis();
@@ -135,12 +149,12 @@ void loop()
       return;
     }
 
-    parpadearLED();
-
     Serial.print("Temperatura: ");
     Serial.print(temperatura, 1);
     Serial.print(" °C | Humedad: ");
     Serial.print(humedad, 1);
     Serial.println(" %");
+
+    enviarDatos(temperatura, humedad);
   }
 }
