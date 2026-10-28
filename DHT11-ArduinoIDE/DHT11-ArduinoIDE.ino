@@ -3,13 +3,13 @@
 #include <ESP8266HTTPClient.h>
 
 // ----- Configuración -----
-#define DHTPIN 5           // GPIO5 = D1 en NodeMCU
+#define DHTPIN 5 // GPIO5 = D1 en NodeMCU
 #define DHTTYPE DHT11
 #define LED_PIN LED_BUILTIN
 
-const char* ssid = "Ivan-office";
-const char* password = "Wifi2026$";
-const char* servidor = "http://192.168.1.100:5000/api/iot/sensor";
+const char *ssid = "Ivan-office";
+const char *password = "Wifi2026$";
+const char *servidor = "http://192.168.1.100:5000/api/iot/sensor";
 
 // ----- Objetos -----
 DHT dht(DHTPIN, DHTTYPE);
@@ -37,9 +37,9 @@ void conectarWiFi()
 
 void parpadearLED()
 {
-  digitalWrite(LED_PIN, LOW);   // Encender LED
+  digitalWrite(LED_PIN, LOW); // Encender LED
   delay(100);
-  digitalWrite(LED_PIN, HIGH);  // Apagar LED
+  digitalWrite(LED_PIN, HIGH); // Apagar LED
 }
 void enviarDatos(float temperatura, float humedad)
 {
@@ -69,16 +69,16 @@ void enviarDatos(float temperatura, float humedad)
   Serial.println(codigo);
 
   if (codigo == 200)
-{
+  {
     parpadearLED();
 
     Serial.println("POST OK");
-}
-else
-{
+  }
+  else
+  {
     Serial.print("Error HTTP: ");
     Serial.println(codigo);
-}
+  }
   http.end();
 }
 
